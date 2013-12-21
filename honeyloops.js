@@ -2,10 +2,13 @@
 
 	"use strict"
 
+	const BASE_FRAME_TIME = 16; // 60 fps base tick
+
 	var cereals = {},
 		lastUid = 0,
 		running = false,
-		interval = 32; // ~30 fps, probably an older browser
+		fpsRatio = 1,
+		timeFraction = 0;
 
 
 // Compat
@@ -18,7 +21,8 @@
 	                         || requestTimeout;
 
 	function requestTimeout(fn) {
-		setTimeout(function(){ fn(Date.now()); }, interval)
+		function call(){ fn(Date.now()); };
+		setTimeout(call, BASE_FRAME_TIME * fpsRatio);
 	}
 
 
@@ -46,15 +50,18 @@
 
 	function frame(time) {
 		if (!running) return;
-		for (var k in cereals)
-			cereals[k](time);
+		if (timeFraction++ % fpsRatio == 0)
+			for (var k in cereals)
+				cereals[k](time);
 		requestAnimationFrame(frame);
 	}
 
-	function start(fallback) {
-		if (fallback != null)
-			interval = fallback;
+	function start(desiredFrameTime) {
 		running = true;
+		fpsRatio = 1;
+		timeFraction = 0;
+		if (desiredFrameTime != null)
+			fpsRatio = Math.max(0, Math.round(desiredFrameTime / BASE_FRAME_TIME));
 		requestAnimationFrame(frame);
 	}
 

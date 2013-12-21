@@ -30,7 +30,7 @@
 				if (options.bindings)
 					this.bindings = options.bindings;
 				_.bindAll(this, 'changed', 'render')
-				HoneyLoops.register(this.render);
+				Honeyloops.register(this.render);
 				this.listenTo(this.model, 'change', this.changed);
 			},
 
@@ -76,7 +76,7 @@
 			bindings: { '.name': 'worst-friend' }
 		});
 
-		HoneyLoops.start();
+		Honeyloops.start();
 
 		console.info(
 			'%cThe two views are each bound onto one of the paragraphs,\n'+
