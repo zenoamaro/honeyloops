@@ -1,143 +1,121 @@
+/*
+Honeyloops.js v0.2.0 --
+github.com/zenoamaro/honeyloops
+*/
+
 ;(function(exports){
 	"use strict"
 
 
-	var BASE_FRAME_TIME = 16;  // We assume a 60 fps frame tick
+	// Namespace for the public exports.
+	var Honeyloops = {};
 
-	var cereals = {},       // Indexed store for handlers.
-		lastUid = 0,        // Last generated unique ID
-		timeScale = 1,      // Divide the base fps speed by this ratio
-		timeFraction = 0,   // Loop counter to implement fps division
-		isRunning = false;  // True if the loop is running.
-
-
-// Polyfilling
-// -----------
-
-	// Try the official method and the various prefixed ones.
-	// Fallback on the timeout implementation.
-	var requestAnimationFrame = requestAnimationFrame
-	                         || webkitRequestAnimationFrame
-	                         || mozRequestAnimationFrame
-	                         || msRequestAnimationFrame
-	                         || oRequestAnimationFrame
-	                         || requestTimeout;
-
-	// Call the frame function at the next frame, passing
-	// the current timestamp as argument. We need a time
-	// so calculate it by normalizing the time scale factor.
-	function requestTimeout(fn) {
-		function call(){ fn( Date.now() ); };
-		setTimeout(call, BASE_FRAME_TIME * timeScale);
-	}
+	var nextBatch = {},        // Stores handlers batched for execution.
+		pendingFrame = false,  // True if a frame has been requested.
+		lastFrameTime = 0,     // Timestamp of last run.
+		lastUid = 0;           // Last unique id produced.
 
 
-// Handlers
-// --------
+	/*
+	Wraps the given function so that it will only be executed
+	during frame redraws. Optionally, pass a context to bind.
 
-	// Attaches a univoque ID to a given function in order
-	// to recognize it and index it in hashes.
-	function unique(fn) {
-		if (fn.uid == null)
-			fn.uid = lastUid++;
-		return fn;
-	}
+	Arguments passed to the wrapper will be proxied to the
+	wrapped function when it runs, with the time since last
+	execution stitched at the end.
 
-	// Register a function as handler to be run on the next frame.
-	// This won't register the same handler twice. Optionally pass a
-	// context for binding.
-	function register(fn, ctx) {
-		cereals[unique(fn).uid] = function(time){
-			return fn.call(ctx, time);
-		};
-	}
+	No more than one execution of the same function will be
+	allowed per frame, and subsequent calls will be ignored.
 
-	// Unregister a handler, so it won't execute during a frame
-	// anymore. If called without a handler, this unregisters all
-	// handlers.
-	//
-	// REVIEW: Won't this aggravate debugging of "undefined" bugs?
-	function unregister(fn) {
-		if (fn == null)
-			cereals = {};
-		else
-			delete cereals[fn.uid];
-	}
-
-
-// Engine
-// ------
-
-	// Called on every occurence of a frame.
-	//
-	// It itself calls each registered handler, passing the current
-	// timestamp as argument. Frames will actually be run only when
-	// falling on the given speed divisor (ie. half of the time).
-	//
-	// It can be invoked manually, in which case a frame will be
-	// rendered regardless of engine status or time division.
-	function frame(time) {
-		// If we haven't been passed a frame (e.g. `frame` has been
-		// called by itself), fake a new timestamp.
-		if (time == null)
-			time = Date().now;
-		// Execute on the time division if we're inside the loop.
-		// If the engine is stopped, produce a frame regardless.
-		//
-		// REVIEW: This uses an incrementing counter. Look onto
-		//         alternative approaches and try to gather if this
-		//         is actually the most efficient or not.
-		if (!isRunning || timeFraction++ % timeScale == 0)
-			for (var k in cereals)
-				cereals[k]( time );
-		// If the engine is not running anymore, don't request any
-		// more frames, thus effectively halting the loop.
-		if (isRunning)
-			requestAnimationFrame(frame);
-	}
-
-	// Starts the frame request loop, optionally matching a desired
-	// frame rate, which will be rounded to an even division of time.
-	//
-	// If called when the engine is running, it will simply speed the
-	// already running loop to the new desired frame rate.
-	function start(desiredFrameTime) {
-		timeScale = 1;
-		timeFraction = 0;
-		// The ratio is based on the assumed 60fps speed that
-		// `requestAnimationFrame` gives us. It is used as divisor
-		// of the desired speed to get an even slicing of time and
-		// implement it with a simple counter. We also cap the scale
-		// so that we won't ever run faster than the base speed.
-		if (desiredFrameTime != null)
-			timeScale = Math.max( 1, Math.round(desiredFrameTime / BASE_FRAME_TIME) );
-		// Accumulated calls to `requestAnimationFrame` will be
-		// ignored by the browser, but would cause undesired extra
-		// frames when using the timeout fallback.
-		if (!isRunning) {
-			isRunning = true;
-			requestAnimationFrame(frame);
+	When called during a frame, the call will be scheduled for
+	execution in the next batch instead.
+	*/
+	Honeyloops.batch = function(fn, ctx) {
+		// Tag function with unique id so we can index it.
+		var uid = lastUid++;
+		// Produce a wrapper that enqueues the function for
+		// execution with given arguments if it wasn't already.
+		return function batched() {
+			var args = Array.prototype.slice.call(arguments);
+			schedule(uid, function (elapsed) {
+				fn.apply(ctx, args.concat([ elapsed ]))
+			});
 		}
 	}
 
-	// Stops the engine so that there won't be additional runs.
-	function stop() {
-		isRunning = false;
+
+// Rendering and scheduling
+// ------------------------
+
+ 	/*
+	Inserts a handler into the next execution batch, indexed by
+	given uid, unless already scheduled in the batch, then
+	schedules a frame for execution, unless already requested.
+	*/
+	function schedule(uid, fn) {
+		if (!(uid in nextBatch))
+			nextBatch[uid] = fn;
+		if (!pendingFrame) {
+			requestAnimationFrame(frame);
+			pendingFrame = true;
+		}
 	}
+
+	/*
+	Executes the batch of handlers
+	*/
+	function frame(frameTime) {
+		// Steal the current execution queue, and switch it with
+		// a new one so that calls from handlers will be queued.
+		var handlers = nextBatch; nextBatch = {};
+		// Calculate time since last frame.
+		var elapsed = frameTime - lastFrameTime;
+		// We are taking care of this frame, so allow another
+		// frame to be requested from inside the handlers.
+		pendingFrame = false;
+		// Replay each call with its own context and arguments.
+		for (var k in handlers)
+			handlers[k](elapsed);
+		// Keep track of updated frame time.
+		lastFrameTime = frameTime;
+	}
+
+
+// Shims
+// -----
+
+	/*
+	Shim of `requestAnimationFrame` for older browsers.
+
+	Will schedule the execution of a handler in 32ms, which is
+	roughly the duration of a frame at 30fps, which is half of
+	what `requestAnimationFrame` provides, as a compromise
+	between consumption and responsivity on slower systems.
+
+	The handler will be passed the current time in ms. Note
+	that, unlike `requestAnimationFrame`, this timestamp is
+	relative from _EPOCH_ and not _navigation start_, but this
+	is good enough for what we need.
+
+	Note also that the scheduling done by this shim is very
+	naive: it will always schedule a run 32ms from now, and the
+	onus of actual batching is on the caller.
+	*/
+	function requestAnimationFrameShim(fn) {
+		function handler(){ fn(Date.now()) };
+		return setTimeout(handler, 32); // 32fps
+	}
+
+	// Try the official method and the various prefixed ones.
+	// Fallback on the shimmed implementation.
+	var requestAnimationFrame = window.requestAnimationFrame
+	                         || window.webkitRequestAnimationFrame
+	                         || window.mozRequestAnimationFrame
+	                         || requestAnimationFrameShim;
 
 
 // Exports
 // -------
-
-	// Public interface
-
-	var Honeyloops = {
-		register: register,
-		unregister: unregister,
-		frame: frame,
-		start: start,
-		stop: stop
-	};
 
 	// Export as a CommonJS module or bind on the globals.
 
