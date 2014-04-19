@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Honeyloops demo</title>
+
+	<style>
+		* { box-sizing: border-box }
+		html, body { height: 100% }
+		body {
+			margin: 0;
+			font-family: sans-serif;
+		}
+		#mouse-position,
+		#mouse-follower {
+			text-align: center;
+		}
+		#mouse-position {
+			padding: 15px;
+		}
+		#mouse-follower {
+			z-index: -1;
+			position: absolute;
+			width: 100px; height: 100px;
+			margin-left: -50px; margin-top: -50px;
+			border: solid 1px #ccc;
+			background: #eee;
+		}
+	</style>
+</head>
+<body>
+
+	<div id="mouse-position">
+		(Move your mouse)
+	</div>
+
+	<div id="mouse-follower"></div>
+
+	<script src="../honeyloops.js"></script>
+	<script src="jquery.js"></script>
+
+	<script>(function(){
+
+		function log() {
+			if (window.console)
+				console.log.apply(console, arguments);
+		}
+
+		function scale(value, time) {
+			return value / 1000 * time;
+		}
+
+		var $mousePosition = $('#mouse-position'),
+			$mouseFollower = $('#mouse-follower'),
+			lastTime = Date.now();
+
+		var trackMouse = Honeyloops.batch(function (x, y) {
+			$mousePosition.text( [x, y].join(', ') );
+			$mouseFollower.css({ left: x, top: y });
+		});
+
+		var borderSize = 0;
+		var colorLoop = Honeyloops.batch(function(elapsed){
+			borderSize = borderSize + scale(5, elapsed);
+			$mouseFollower.css('border-width',
+				1 + Math.abs(Math.round( 5 - borderSize % 10 )));
+			colorLoop();
+		})
+
+		window.onmousemove = function(event) {
+			trackMouse(event.clientX, event.clientY);
+			colorLoop();
+		}
+
+		colorLoop();
+
+	})();</script>
+
+</body>
+</html>

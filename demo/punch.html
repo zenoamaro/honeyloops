@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Honeyloops demo</title>
+
+	<style>
+		* { box-sizing: border-box }
+		html, body { height: 100% }
+		body {
+			margin: 0;
+			font-family: sans-serif;
+		}
+		#counter {
+			position: absolute;
+			width: 100px;
+			left: 50%; top: 50%;
+			margin-left: -50px;
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+	<div id="counter">(punch)</div>
+
+	<script src="../honeyloops.js"></script>
+	<script src="jquery.js"></script>
+
+	<script>(function(){
+
+		var punch = 0.0,
+			falloff = 4,
+			$counter = $('#counter');
+
+		function scale(value, time) {
+			return value / 1000 * time;
+		}
+
+		window.onkeydown = Honeyloops.batch(function(){
+			punch += 10;
+			punchAnimation();
+		});
+
+		var punchAnimation = Honeyloops.batch(function(elapsed){
+			var deflation = Math.max(0.01, scale(punch * falloff, elapsed));
+			punch = Math.max(0.0, punch - deflation);
+			$counter.css('transform', 'scale(\1)'.replace('\1', 1 + punch));
+			if (punch) punchAnimation();
+		});
+
+	})();</script>
+
+</body>
+</html>
