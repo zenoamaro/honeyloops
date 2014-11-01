@@ -1,5 +1,5 @@
 /*
-Honeyloops.js v0.2.0 --
+Honeyloops.js v0.2.1 --
 github.com/zenoamaro/honeyloops
 */
 

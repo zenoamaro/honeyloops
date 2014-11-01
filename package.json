@@ -1,6 +1,6 @@
 {
   "name": "honeyloops",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Micro batching and scheduling over animation frames.",
   "author": "zenoamaro <zenoamaro@gmail.com>",
   "license": "MIT",
