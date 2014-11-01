@@ -1,7 +1,7 @@
 Honeyloops
 ==========
 
-Honeyloops is a micro library (less than 512 bytes gzipped) for debouncing and batching the execution of handlers on [frame rendering]. It falls back to timeouts on older browsers and has no external dependencies.
+Honeyloops is a micro library (less than 512 bytes gzipped) for batching and scheduling the execution of handlers on [frame rendering]. It falls back to timeouts on older browsers and has no external dependencies.
 
 [frame rendering]: https://developer.mozilla.org/en/docs/Web/API/window.requestAnimationFrame
 
