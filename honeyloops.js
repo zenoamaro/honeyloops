@@ -3,7 +3,7 @@ Honeyloops.js v0.2.0 --
 github.com/zenoamaro/honeyloops
 */
 
-;(function(exports){
+;(function(globals){
 	"use strict"
 
 
@@ -108,9 +108,9 @@ github.com/zenoamaro/honeyloops
 
 	// Try the official method and the various prefixed ones.
 	// Fallback on the shimmed implementation.
-	var requestAnimationFrame = window.requestAnimationFrame
-	                         || window.webkitRequestAnimationFrame
-	                         || window.mozRequestAnimationFrame
+	var requestAnimationFrame = globals.requestAnimationFrame
+	                         || globals.webkitRequestAnimationFrame
+	                         || globals.mozRequestAnimationFrame
 	                         || requestAnimationFrameShim;
 
 
@@ -122,7 +122,7 @@ github.com/zenoamaro/honeyloops
 	if (typeof module !== 'undefined' && 'exports' in module)
 		module.exports = Honeyloops;
 	else
-		exports.Honeyloops = Honeyloops;
+		globals.Honeyloops = Honeyloops;
 
 
 })(this);
