@@ -1,0 +1,43 @@
+{
+  "name": "honeyloops",
+  "version": "0.2.0",
+  "description": "Micro batching and scheduling over animation frames.",
+  "author": "zenoamaro <zenoamaro@gmail.com>",
+  "license": "MIT",
+
+  "homepage": "https://github.com/zenoamaro/honeyloops",
+
+  "bugs": {
+    "url": "https://github.com/zenoamaro/honeyloops/issues",
+    "email": "zenoamaro@gmail.com"
+  },
+
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zenoamaro/honeyloops.git"
+  },
+
+  "main": "honeyloops.js",
+
+  "scripts": {
+    "build": "make build"
+  },
+
+  "engines": {
+    "node": ">= 0.6.x"
+  },
+
+  "keywords": [
+    "batch",
+    "render",
+    "rendering",
+    "requestAnimationFrame"
+  ],
+
+  "files": [
+    "honeyloops.js",
+    "README.md",
+    "LICENSE"
+  ]
+
+}
