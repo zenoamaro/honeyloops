@@ -39,6 +39,7 @@
     "mocha-text-cov": "^0.1.0",
     "should": "^4.1.0",
     "sinon": "^1.11.1",
+    "travis-cov": "^0.2.5",
     "uglify-js": "^2.4.15"
   }
 }

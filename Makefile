@@ -1,9 +1,9 @@
-TEST=./node_modules/.bin/mocha
-TEST_SPEC_FLAGS=-R spec
-TEST_COVERAGE_FLAGS=-R mocha-text-cov
-
 LINT=./node_modules/.bin/jshint
 LINT_FLAGS=
+
+TEST=./node_modules/.bin/mocha
+SPEC_FLAGS=-R spec
+COVERAGE_FLAGS=-R mocha-text-cov
 
 MINIFY=./node_modules/.bin/uglifyjs
 MINIFY_FLAGS=-c -m --comments '/Honeyloops/'
@@ -13,7 +13,7 @@ usage:
 	@echo lint: lints the source
 	@echo spec: runs the test specs
 	@echo coverage: runs the code coverage test
-	@echo test: lint, spec and coverage
+	@echo test: lint, spec and coverage treshold test
 	@echo build: builds the minified version
 
 .PHONY: usage test lint
@@ -23,16 +23,15 @@ lint:
 	@$(LINT) $(LINT_FLAGS) honeyloops.js
 
 spec:
-	@$(TEST) $(TEST_SPEC_FLAGS) test/index
+	@$(TEST) $(SPEC_FLAGS) test/index
 
 coverage:
-	@$(TEST) $(TEST_COVERAGE_FLAGS) test/index
+	@$(TEST) $(COVERAGE_FLAGS) test/index
 
 test:
 	@make lint
-	@make spec
-	@make coverage
-
+	@make spec SPEC_FLAGS="-R dot"
+	@make coverage COVERAGE_FLAGS="-R travis-cov"
 
 build: honeyloops.min.js
 
