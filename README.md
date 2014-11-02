@@ -106,7 +106,9 @@ Honeyloops publishes a single namespace, `Honeyloops`, either on `window` or as 
 
 Schedules the execution of the given handler before the next animation frame. Handlers will be batched so they are executed together, and debounced so that each handler will only run once.
 
-The handler will be passed the time elapsed since the last frame. If the handler is called again during a run, it will be scheduled for the next batch.
+The handler will be passed the time elapsed since the last frame. If the handler is called again during a run, it will be scheduled for the next batch. 
+
+Scheduling a handler will replaces all previous schedules for this handler or any other handler with the same tag. See the documentation for [tag](#honeyloopstag) below on how to group different handlers together.
 
 
 ### Honeyloops.batch
@@ -117,6 +119,8 @@ Wraps the given handler into a promise of executing the handler only once during
 
 Any argument given to the wrapper will be passed to the wrapped function, with the time elapsed since last frame as the last argument. If the handler is called again during a run, it will be scheduled for the next batch.
 
+Scheduling a handler will replaces all previous schedules for this handler or any other handler with the same tag. See the documentation for [tag](#honeyloopstag) below on how to group different handlers together. Note that you should tag handlers _before_ passing them to `batch()`.
+
 
 ### Honeyloops.tag
 
@@ -125,6 +129,12 @@ Any argument given to the wrapper will be passed to the wrapped function, with t
 Returns the unique id distinguishing a handler. Identical handlers will always return the same id.
 
 If given a custom tag, it will replace that handler's original tag, putting it in the same debouncing bucket as other handlers with the same tag.
+
+~~~js
+var uid = Honeyloops.tag(myHandler);
+Honeyloops.tag(myOtherHandler, uid);
+Honeyloops.tag(yetAnotherHandler, uid);
+~~~
 
 
 Building and testing
@@ -166,8 +176,9 @@ Roadmap
 Changelog
 ---------
 #### next
-- Added lints, specs and coverage tests.
+- BREAKING: Scheduling a handler now replaces its previous schedules.
 - Published more methods on the public interface.
+- Added lints, specs and coverage tests.
 
 #### v0.2.1
 - Honeyloops is now a proper NPM package.

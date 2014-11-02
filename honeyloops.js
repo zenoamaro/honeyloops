@@ -49,16 +49,17 @@ github.com/zenoamaro/honeyloops
 
 	/*
 	Queues a handler for execution in the next batch, then
-	requests a frame, unless already requested.
+	requests a frame, unless already requested. Replaces all
+	previous schedules for this handler or any other handler
+	with the same tag.
 	*/
 	function schedule(fn) {
-		var uid = tag(fn);
-		if (!(uid in nextBatch)) {
-			nextBatch[uid] = fn;
-		}
+		// Add or replace.
+		nextBatch[ tag(fn) ] = fn;
+		// Request only if needed.
 		if (!pendingFrame) {
-			requestAnimationFrame(frame);
 			pendingFrame = true;
+			requestAnimationFrame(frame);
 		}
 	}
 

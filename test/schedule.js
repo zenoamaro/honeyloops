@@ -27,6 +27,21 @@ describe('schedule()', function(){
 		HL.schedule(probe);
 	});
 
+	it('should replace the previous schedule for a handler', function(done){
+		var probeA = sinon.spy(function(){
+			probeA.callCount.should.be.exactly(0);
+			done();
+		});
+		var probeB = sinon.spy(function(){
+			probeB.callCount.should.be.exactly(1);
+			done();
+		});
+		// Tag handlers the same.
+		HL.tag(probeB, HL.tag(probeA));
+		HL.schedule(probeA);
+		HL.schedule(probeB);
+	});
+
 	it('should schedule the function again once inside a frame', function(done){
 		var probe = sinon.spy(function(){
 			if (probe.calledOnce) {

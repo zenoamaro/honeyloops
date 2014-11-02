@@ -3,8 +3,9 @@ Changelog
 
 next
 ----
-- Added lints, specs and coverage tests.
+- BREAKING: Scheduling a handler now replaces its previous schedules.
 - Published more methods on the public interface.
+- Added lints, specs and coverage tests.
 
 v0.2.1
 ------

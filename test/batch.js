@@ -32,6 +32,17 @@ describe('batch()', function(){
 		batched();
 	});
 
+	it('should replace the previous schedule for a handler', function(done){
+		var probe = sinon.spy(function(arg){
+			arg.should.be.exactly(3);
+			done();
+		});
+		var batched = HL.batch(probe);
+		batched(1);
+		batched(2);
+		batched(3);
+	});
+
 	it('should schedule the function again once inside a frame', function(done){
 		var probe = sinon.spy(function(){
 			if (probe.calledOnce) {
