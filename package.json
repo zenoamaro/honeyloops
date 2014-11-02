@@ -16,7 +16,8 @@
   "main": "honeyloops.js",
   "scripts": {
     "lint": "make lint",
-    "build": "make build"
+    "build": "make build",
+    "test": "make test"
   },
   "engines": {
     "node": ">= 0.6.x"
@@ -34,6 +35,8 @@
   ],
   "devDependencies": {
     "jshint": "^2.5.8",
+    "mocha": "^2.0.1",
+    "should": "^4.1.0",
     "uglify-js": "^2.4.15"
   }
 }
