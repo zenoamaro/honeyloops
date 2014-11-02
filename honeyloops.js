@@ -10,7 +10,7 @@ github.com/zenoamaro/honeyloops
 	var nextBatch = {},        // Stores handlers batched for execution.
 		pendingFrame = false,  // True if a frame has been requested.
 		lastFrameTime = 0,     // Timestamp of last run.
-		lastUid = 0;           // Last unique id produced.
+		nextUid = 1;           // Next unique id to be produced.
 
 
 	/*
@@ -28,15 +28,18 @@ github.com/zenoamaro/honeyloops
 	execution in the next batch instead.
 	*/
 	function batch(fn, ctx) {
-		// Tag function with unique id so we can index it.
-		var uid = lastUid++;
-		// Produce a wrapper that enqueues the function for
-		// execution with given arguments if it wasn't already.
+		// Tag the function with unique id.
+		var uid = tag(fn);
+		// Produce a wrapper that queues the function for
+		// batched execution with the given arguments.
 		return function batched() {
+			// Partially apply arguments to the handler.
 			var args = Array.prototype.slice.call(arguments);
-			schedule(uid, function (elapsed) {
-				fn.apply(ctx, args.concat([ elapsed ]));
-			});
+			function handler(elapsed) { fn.apply(ctx, args.concat(elapsed)) }
+			// We are generating a new applied function each
+			// time, tag them with the same uid so that they
+			// will all be debounced correctly.
+			tag(handler, uid); schedule(handler);
 		};
 	}
 
@@ -45,11 +48,11 @@ github.com/zenoamaro/honeyloops
 // ------------------------
 
 	/*
-	Inserts a handler into the next execution batch, indexed by
-	given uid, unless already scheduled in the batch, then
-	schedules a frame for execution, unless already requested.
+	Queues a handler for execution in the next batch, then
+	requests a frame, unless already requested.
 	*/
-	function schedule(uid, fn) {
+	function schedule(fn) {
+		var uid = tag(fn);
 		if (!(uid in nextBatch)) {
 			nextBatch[uid] = fn;
 		}
@@ -80,8 +83,23 @@ github.com/zenoamaro/honeyloops
 	}
 
 
-// Shims
-// -----
+// Utilities and shims
+// -------------------
+
+	/*
+	Returns a unique id distinguishing the function. The same
+	function will always return the same id. Functions will be
+	tagged with a custom uid if provided as argument.
+
+	Internally, this attaches a `uid` property to the function.
+	*/
+	function tag(fn, uid) {
+		// Overwrite the uid if with the custom one.
+		if (uid) { fn.uid = uid }
+		// If the function has no id, generate a new one.
+		if (!fn.uid) { fn.uid = nextUid++ }
+		return fn.uid;
+	}
 
 	/*
 	Shim of `requestAnimationFrame` for older browsers.
@@ -118,6 +136,7 @@ github.com/zenoamaro/honeyloops
 
 	// Namespace for the public exports.
 	var Honeyloops = {
+		tag: tag,
 		batch: batch,
 		schedule: schedule,
 		frame: frame,
