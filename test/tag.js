@@ -42,7 +42,7 @@ describe('tag()', function(){
 		uidA.should.not.be.exactly(uidB);
 	});
 
-	it('should not alter the function', function(){
+	it('should not alter the behavior of the function', function(){
 		var value = 1;
 		function probe() { value += 1 }
 		HL.tag(probe);

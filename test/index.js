@@ -1,7 +1,4 @@
-/* global describe */
 'use strict';
-
-describe('Honeyloops', function(){
-	require('./tag');
-	require('./schedule');
-});
+require('./tag');
+require('./schedule');
+require('./batch');

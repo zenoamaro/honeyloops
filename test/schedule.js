@@ -18,6 +18,7 @@ describe('schedule()', function(){
 	it('should schedule the function only once per frame', function(done){
 		var calls = 0;
 		function probe() {
+			calls++;
 			calls.should.be.lessThan(2);
 			done();
 		}
@@ -41,6 +42,16 @@ describe('schedule()', function(){
 		}
 		HL.schedule(probe);
 		HL.schedule(probe);
+		HL.schedule(probe);
+	});
+
+	it('should pass the elapsed time to the handler', function(done){
+		var startTime = Date.now();
+		function probe(elapsed) {
+			var reference = Date.now() - startTime;
+			elapsed.should.be.approximately(reference, 16);
+			done();
+		}
 		HL.schedule(probe);
 	});
 
