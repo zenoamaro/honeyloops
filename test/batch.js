@@ -15,13 +15,13 @@ describe('batch()', function(){
 		batched.should.be.a.Function;
 	});
 
-	it('should schedule an execution', function(done){
+	it('should schedule the execution of the handler', function(done){
 		function probe() { done() }
 		var batched = HL.batch(probe);
 		batched();
 	});
 
-	it('should schedule only one execution', function(done){
+	it('should schedule only one execution per frame', function(done){
 		var probe = sinon.spy(function(){
 			probe.callCount.should.be.exactly(1);
 			done();

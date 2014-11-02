@@ -13,7 +13,7 @@ usage:
 	@echo lint: lints the source
 	@echo spec: runs the test specs
 	@echo coverage: runs the code coverage test
-	@echo test: lint, spec and coverage treshold test
+	@echo test: lint, spec and coverage threshold test
 	@echo build: builds the minified version
 
 .PHONY: usage test lint
