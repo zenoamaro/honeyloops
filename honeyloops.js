@@ -94,10 +94,10 @@ github.com/zenoamaro/honeyloops
 	Internally, this attaches a `uid` property to the function.
 	*/
 	function tag(fn, uid) {
-		// Overwrite the uid if with the custom one.
+		// Overwrite the uid with the custom one.
 		if (uid) { fn.uid = uid }
-		// If the function has no id, generate a new one.
-		if (!fn.uid) { fn.uid = nextUid++ }
+		// Or generate a new one if needed.
+		else if (!fn.uid) { fn.uid = nextUid++ }
 		return fn.uid;
 	}
 
