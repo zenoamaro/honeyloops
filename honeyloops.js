@@ -7,9 +7,6 @@ github.com/zenoamaro/honeyloops
 	'use strict';
 
 
-	// Namespace for the public exports.
-	var Honeyloops = {};
-
 	var nextBatch = {},        // Stores handlers batched for execution.
 		pendingFrame = false,  // True if a frame has been requested.
 		lastFrameTime = 0,     // Timestamp of last run.
@@ -30,7 +27,7 @@ github.com/zenoamaro/honeyloops
 	When called during a frame, the call will be scheduled for
 	execution in the next batch instead.
 	*/
-	Honeyloops.batch = function(fn, ctx) {
+	function batch(fn, ctx) {
 		// Tag function with unique id so we can index it.
 		var uid = lastUid++;
 		// Produce a wrapper that enqueues the function for
@@ -41,7 +38,7 @@ github.com/zenoamaro/honeyloops
 				fn.apply(ctx, args.concat([ elapsed ]));
 			});
 		};
-	};
+	}
 
 
 // Rendering and scheduling
@@ -119,8 +116,15 @@ github.com/zenoamaro/honeyloops
 // Exports
 // -------
 
-	// Export as a CommonJS module or bind on the globals.
+	// Namespace for the public exports.
+	var Honeyloops = {
+		batch: batch,
+		schedule: schedule,
+		frame: frame,
+		requestAnimationFrameShim: requestAnimationFrameShim
+	};
 
+	// Export as a CommonJS module or bind on the globals.
 	if (typeof module !== 'undefined' && 'exports' in module) {
 		module.exports = Honeyloops;
 	} else {
