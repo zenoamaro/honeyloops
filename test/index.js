@@ -2,5 +2,5 @@
 'use strict';
 
 describe('Honeyloops', function(){
-	/* ... */
+	require('./tag');
 });
