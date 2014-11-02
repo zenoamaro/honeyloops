@@ -43,8 +43,8 @@ describe('tag()', function(){
 	});
 
 	it('should not alter the behavior of the function', function(){
-		var value = 1;
 		function probe() { value += 1 }
+		var value = 1;
 		HL.tag(probe);
 		probe();
 		value.should.be.exactly(2);
