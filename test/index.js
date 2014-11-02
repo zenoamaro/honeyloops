@@ -3,4 +3,5 @@
 
 describe('Honeyloops', function(){
 	require('./tag');
+	require('./schedule');
 });
