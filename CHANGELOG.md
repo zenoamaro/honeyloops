@@ -1,8 +1,8 @@
 Changelog
 =========
 
-next
-----
+v0.3.0
+------
 - BREAKING: Scheduling a handler now replaces its previous schedules.
 - Published more methods on the public interface.
 - Added lints, specs and coverage tests.
